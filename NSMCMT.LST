@@ -1,0 +1,728 @@
+5724-B67  IBM(R) PL/I for Windows   6.0      (Built:20060113)                                  2019.06.10 15:10:56   Page     1
+
+
+                    Options Specified
+
+ Environment:
+
+ Command: NSMCMT (S OPT(TIME) NOIMPRECISE F(I) A AG NEST LC(32767) NOXREF
+ NOSTMT GONUMBER SYSTEM(WINDOWS) DEFAULT(INLINE, REORDER, LINKAGE(OPTLINK),
+ SHORT(IEEE), E(HEXADEC)) PREFIX(NOUNDERFLOW) MSG(390)
+
+ Line.File Process Statements
+
+    1.0    *PROCESS MACRO;
+
+5724-B67  IBM(R) PL/I for Windows   (NOUNDERFLOW):                                             2019.06.10 15:10:56   Page     2
+
+Compiler Source
+
+   Line.File LV NT
+
+      2.0            (NOUNDERFLOW):
+      3.0            NMSCMT:PACKAGE;
+      6.0            DECLARE (DPMIN1,DPMIN2) FLOAT STATIC;
+      7.0            DECLARE (XIX, XIY, EX, EY, CLX, CLE, CLXX, CLEE)(0:501,500) FLOAT
+      8.0            /*CONTROLLED*/STATIC;
+      9.0            DECLARE (U, V, P, U2, V2, P2)(-1:502,0:500) FLOAT(16)
+     10.0            STATIC/*CONTROLLED*/;
+     11.0            DECLARE (U1, V1, P1, D1, D2, D3, C1, C2)(-1:502,0:500) FLOAT(16)
+     12.0            STATIC/*CONTROLLED*/;
+     13.0
+     14.0            DECLARE (N, M, KMAX, K1, NTS) BINARY FIXED(31) STATIC;
+     15.0            DECLARE (AMMAX,BETA,CT,DDP)FLOAT(16)/*STATIC*/;
+     16.0            DECLARE IW BINARY FIXED STATIC INIT(1);
+     17.0            NSMC:PROCEDURE OPTIONS (MAIN) REORDER;
+     18.0
+     19.0
+     20.0     1      DECLARE CONV FILE RECORD INPUT, GP FILE INPUT, (PLOT,PLOT1,PLOT2)
+     21.0            FILE OUTPUT, SYSPRINT FILE OUTPUT INTERNAL, SYSIN INPUT/*PRINT*/;
+     22.0     1      DECLARE (I, J, K, K2) BINARY FIXED(31)/* STATIC*/;
+     23.0     1      DECLARE DISP CHARACTER(200) VARYING;
+     24.0     1      DECLARE (X(501,500),Y(501,500)) FLOAT /*CONTROLLED*/STATIC;
+     25.0     1      DECLARE (AA,RE,CRELP,PMAX,
+     26.0            DPM,DPMIN,DVM,DUM,DP,ALPHA,CDR)FLOAT(16)/*STATIC*/;
+     27.0     1      DECLARE (CY,CX,CYA,CXA,CYAAL,AK) FLOAT;
+     28.0     1      DECLARE (DPM2,DN,UV1,UV2,SSS,ALR,VMAX)FLOAT(16)/*STATIC*/;
+     29.0
+     30.0     1      DECLARE NT(8) FIXED BINARY (31) STATIC INITIAL(1,2,3,4,5,6,7,8);
+     31.0     1      DECLARE TR(8) TASK;
+     32.0     1      DECLARE MAINCALC ENTRY(POINTER BYVALUE);
+     33.0
+     34.0     1        OPEN FILE (PLOT1)TITLE('/NSMC1.PLOT, APPEND(N)')OUTPUT;
+     35.0     1        OPEN FILE (PLOT3)TITLE('/NSMC3.PLOT, APPEND(N)')OUTPUT;
+     36.0     1        CLOSE FILE (PLOT1), FILE (PLOT3);
+     37.0     1      GET DATA (ALPHA,RE,AA,CT,KMAX,NTS) /*COPY*/;
+     38.0     1      BETA=AA;
+     39.0
+     40.0     1      CRELP=1;
+     41.0     1      OPEN FILE (CONV)
+     42.0            TITLE('/CONV.OUT, TYPE(FIXED), RECSIZE(4)');
+     43.0     1      READ FILE(CONV) INTO(N);
+     44.0     1      READ FILE(CONV) INTO(M);
+     45.0            /*ALLOCATE U, V, P, U2, V2, P2;
+     46.0            ALLOCATE XIX, XIY, EX, EY, CLX, CLE, CLXX, CLEE;
+     47.0            ALLOCATE X,Y;*/
+     48.0
+     49.0     1      U,U2=COSD(ALPHA);
+     50.0     1      V,V2=SIND(ALPHA);
+     51.0     1      U(*,1),V(*,1),P(*,1), U2(*,1),V2(*,1),P2(*,1)=0;
+     52.0     1      P,P1,P2=0;
+     53.0
+     54.0     1      DO I=1 TO N;
+     55.0     1  1     DO J=2 TO M-1;
+     56.0     1  2        U(I,J)=U(I,M)*FLOAT(J-1)/FLOAT(M-1);
+     57.0     1  2        V(I,J)=V(I,M)*FLOAT(J-1)/FLOAT(M-1);
+     58.0     1  2     END;
+     59.0     1  1   END;
+     60.0            /* Читаем метрики преобразования сетки */
+     61.0     1      READDATA:
+     62.0            DO J=1 TO M;
+     63.0     1  1     DO I=1 TO N;
+     64.0     1  2        READ FILE(CONV)INTO(XIX(I,J));
+     65.0     1  2        READ FILE(CONV)INTO(XIY(I,J));
+     66.0     1  2        READ FILE(CONV)INTO(EX(I,J));
+     67.0     1  2        READ FILE(CONV)INTO(EY(I,J));
+     68.0     1  2        READ FILE(CONV)INTO(CLX(I,J));
+     69.0     1  2        READ FILE(CONV)INTO(CLE(I,J));
+     70.0     1  2        READ FILE(CONV)INTO(CLXX(I,J));
+     71.0     1  2        READ FILE(CONV)INTO(CLEE(I,J));
+     72.0     1  2     END;
+     73.0     1  1   END READDATA;
+     74.0     1      CLOSE FILE (CONV);
+     75.0     1       AMMAX=0;
+     76.0     1       COURANT:
+     77.0             DO I=1 TO N;
+     78.0     1  1     AMMAX=MAX(AMMAX,ABS(XIX(I,2)),ABS(XIY(I,2)),
+     79.0              ABS(EX(I,2)),ABS(EY(I,2)));
+     80.0     1  1    END COURANT;
+     81.0     1       CT=CT/AMMAX;
+     82.0     1       DDP=CT*4*BETA/1128;
+     83.0
+     84.0            /* Умножаем метрики на коэффициенты числа Рейнольдса */
+     85.0            /* и центральных разностей                           */
+     86.0
+     87.0     1      CLX=CLX/RE; CLE=CLE/RE; CLXX=CLXX/RE;
+     88.0     1      CLEE=CLEE/RE;
+     89.0     1      ON ERROR BEGIN;
+     90.0     2                 DISPLAY ('ОШИБКА!');
+     91.0     2                 GOTO LABEL1;
+     92.0     2               END;
+     93.0     1      ON ATTENTION GOTO LABEL1;
+     94.0
+     95.0     1       K1=0;
+     96.0            /* Здесь был главный цикл */
+     97.0            /*DO K=1 TO KMAX;*/
+     98.0            /*IF MOD (K,10)=0 THEN DISPLAY(CHARVAL(27)||'[5;1H'||K);*/
+     99.0     1      DPMIN2=100;
+    100.0     1      BETALOOP:
+    101.0             DO ITC=1 TO 10000;
+    102.0     1  1    DPMIN1=0;
+    103.0     1  1    IW=1;
+    104.0     1  1     PUT STRING(DISP)EDIT(CHARVAL(27),'[',15,';1H',
+    105.0              'ITC=',ITC) (2 A(1),F(2),2 A,F(4));
+    106.0     1  1   DISPLAY(DISP);
+    107.0     1  1   MAINLOOP:
+    108.0              DO I=1 TO NTS;
+    109.0     1  2        ATTACH MAINCALC(ADDR(NT(I))) THREAD (TR(I));
+    110.0     1  2    END MAINLOOP;
+    111.0     1  1    DO I=1 TO NTS;
+    112.0     1  2        WAIT THREAD (TR(I));
+    113.0     1  2    END;
+    114.0            /*END;*/
+    115.0     1  1     DISPLAY('Расчет завершен');
+    116.0     1  1     LABEL1:REVERT ERROR;
+    117.0     1  1     DISPLAY('Выводим данные');
+    118.0     1  1     OPEN FILE (GP)TITLE('/GRID5.PLOT,')INPUT;
+    119.0     1  1   READGRID:
+    120.0              DO J=1 TO M;
+    121.0     1  2        DO I=1 TO N;
+    122.0     1  3           GET FILE(GP) LIST(X(I,J),Y(I,J)) SKIP;
+    123.0
+    124.0     1  3        END;
+    125.0     1  2        GET FILE (GP) SKIP(2);
+    126.0     1  2     END READGRID;
+    127.0     1  1     CLOSE FILE (GP);
+    128.0     1  1     X(N+1,1)=X(1,1);
+    129.0     1  1     Y(N+1,1)=Y(1,1);
+    130.0
+    131.0     1  1     CX=0;CY=0;
+    132.0     1  1     DN=ABS(X(1,1)-X(1,2));
+    133.0
+    134.0     1  1     DO I=1 TO N;
+    135.0             /* UV1=SQRT(U(I,2)**2+V(I,2)**2);
+    136.0              UV2=SQRT(U(I+1,2)**2+V(I+1,2)**2);
+    137.0              SSS=SIGN((U(I+1,2)-U(I,1))*(X(I+1,2)-X(I,1))+
+    138.0               (V(I+1,2)-V(I,2))*(Y(I+1,1)-Y(I,1)));*/
+    139.0     1  2        CX=CX+(P(I,1)+P(I+1,1))*(Y(I+1,1)-Y(I,1))
+    140.0               /* +SSS*(UV2+UV1)*(X(I+1,1)-X(I,1))/RE/DN*/;
+    141.0     1  2       CY=CY-(P(I,1)+P(I+1,1))*(X(I+1,1)-X(I,1))
+    142.0                /*+SSS*(UV2+UV1)*(Y(I+1,1)-Y(I,1))/RE/DN*/;
+    143.0     1  2     END;
+    144.0     1  1     CX+=CX;CY+=CY;
+    145.0
+    146.0     1  1     CYA=CY*COSD(ALPHA)-CX*SIND(ALPHA);
+    147.0     1  1     CXA=CY*SIND(ALPHA)+CX*COSD(ALPHA);
+    148.0     1  1     ALR=ALPHA*3.14159265/180;
+    149.0     1  1     IF ALR ^=0 THEN CYAAL=CYA/ALR;
+    150.0     1  1     AK=CYA/CXA;
+    151.0     1  1     VMAX=0;
+    152.0     1  1     DO I=1 TO N;
+    153.0     1  2        DO J=1 TO M;
+    154.0     1  3           VMAX=MAX(VMAX,V(I,J)**2+U(I,J)**2);
+    155.0     1  3        END;
+    156.0     1  2     END;
+    157.0     1  1     VMAX=SQRT(VMAX);
+    158.0
+    159.0     1  1     OPEN FILE (PLOT1)TITLE('/NSMC1.PLOT, APPEND(Y)')OUTPUT;
+    160.0     1  1     OPEN FILE (PLOT3)TITLE('/NSMC3.PLOT, APPEND(Y)')OUTPUT;
+    161.0
+    162.0     1  1     CDR=0.002;
+    163.0     1  1     PUT SKIP FILE(PLOT1)LIST(ITC,CYAAL);
+    164.0     1  1     PUT SKIP FILE(PLOT3)LIST(ITC,LOG(DPMIN1));
+    165.0
+    166.0            /*IF(DPMIN1<DPMIN2) THEN */
+    167.0     1  1   OUTRES:DO;
+    168.0     1  2   OPEN FILE (SYSPRINT)/* PAGESIZE(2000)*/;
+    169.0     1  2   OPEN FILE(PLOT);
+    170.0     1  2   OPEN FILE (PLOT2)TITLE('/NSMC2.PLOT, APPEND(N)')OUTPUT;
+    171.0     1  2   PUT SKIP DATA (ITC);
+    172.0     1  2   PUT SKIP EDIT('Угол атаки',ALPHA,'Число Рейнольдса',RE,
+    173.0            'Точек вдоль профиля',N,'Точек поперек профиля',M)
+    174.0            (2(A(25),F(12,2),SKIP),2(A(25),F(12,0),SKIP));
+    175.0     1  2     PUT SKIP(2) EDIT('Cy',CY,'Cx',CX,'Cya',CYA,'Cxa',
+    176.0              CXA,'Cya/Alpha',CYAAL,'K',AK,'Mmax=',VMAX/SQRT(BETA))
+    177.0     1  2     (A(10),F(7,3),SKIP);PUT SKIP;
+    178.0     1  2     PUT SKIP(2) EDIT ('I','Pн','Pв')
+    179.0     1  2     (X(3),A(4),2 A(7));PUT SKIP;
+    180.0
+    181.0     1  2       DO I=1 TO N/2+1;
+    182.0     1  3           J=N-I+2;
+    183.0     1  3           PUT SKIP EDIT (I,P(J,1), P(I,1))
+    184.0                    (F(4),4(F(7,3)));
+    185.0     1  3       END;
+    186.0     1  2     DO I=1 TO N;
+    187.0     1  3        PUT FILE(PLOT)SKIP EDIT(X(I,1),2*P(I,1))(F(10,4),X(2));
+    188.0     1  3     END;
+    189.0
+    190.0     1  2     PUT FILE(PLOT) SKIP(2);
+    191.0
+    192.0     1  2     DO I=1 TO N/2+1;
+    193.0     1  3        PUT FILE(PLOT) SKIP EDIT(X(I,1),2*(-P(I,1)+P(N-I+2,1)))(F(10,4),
+    194.0            X(2));
+    195.0     1  3     END;
+    196.0     1  2     PUT FILE (PLOT) SKIP(2);
+    197.0     1  2     CLOSE FILE(PLOT);
+    198.0     1  2   OUTPUTPLOT:
+    199.0              DO J=1 TO M;
+    200.0     1  3        DO I=1 TO N;
+    201.0     1  4        I=MAX(I,1);
+    202.0             /*       PUT SKIP FILE(PLOT1)(X(I,J),Y(I,J));*/
+    203.0     1  4           PUT SKIP FILE(PLOT2)(X(I,J),Y(I,J));
+    204.0             /*       PUT SKIP FILE(PLOT1)(X(I,J)+P(I,J)*CDR*4,Y(I,J));*/
+    205.0     1  4          PUT SKIP FILE(PLOT2)(X(I,J)+U(I,J)*CDR,Y(I,J)+V(I,J)*CDR);
+    206.0             /*       PUT FILE(PLOT1)SKIP;*/
+    207.0     1  4           PUT FILE(PLOT2)SKIP;
+    208.0     1  4        END;
+    209.0     1  3     END OUTPUTPLOT;
+    210.0     1  2   END OUTRES;
+    211.0     1  1   DPMIN2=MIN(DPMIN2,DPMIN1);
+    212.0
+    213.0     1  1   CLOSE FILE (SYSPRINT);
+    214.0     1  1   CLOSE FILE (PLOT1);
+    215.0     1  1   CLOSE FILE (PLOT2);
+    216.0     1  1   CLOSE FILE (PLOT3);
+    217.0     1  1   END BETALOOP;
+    218.0     1      END NSMC;
+    219.0
+    220.0            MAINCALC:
+    221.0            PROCEDURE (BN) REORDER;
+    222.0     1      DECLARE BN POINTER BYVALUE, NT FIXED BINARY(31) BASED (BN);
+    223.0     1      DECLARE DISP CHARACTER(132);
+    224.0     1      DECLARE (I,J,K,K2,IL,IU) BINARY(31) FIXED;
+    225.0     1      DECLARE (DUM,DVM,DPM,PMAX,DPM2,DPMIN)
+    226.0            FLOAT(16);
+    227.0     1      PUT STRING (DISP) EDIT ('Поток ',NT,' запущен')(A,F(1),A);
+    228.0     1      DISPLAY (DISP);
+    229.0     1      DPMIN,DPM2=10000;
+    230.0     1      K2=0;
+    231.0     1      DPM=0;
+    232.0     1      TIMELOOP:
+    233.0            DO K=1 TO KMAX*NT UNTIL(IW=0/*DPM<DDP / | K1>0*/);
+    234.0
+    235.0     1  1   IF /*DPM>100*DPMIN |*/ K2>15000 THEN
+    236.0     1  1   CTHALF:DO;
+    237.0            /*  K2=0;
+    238.0              CT=CT/2;DDP=DDP/2;
+    239.0              K1=K1+1;           */
+    240.0     1  2   END CTHALF;
+    241.0     1  1     DPM,DUM,DVM,PMAX=0;
+    242.0     1  1   INITCOND:
+    243.0              DO J=1 TO M;
+    244.0     1  2        U(N+1,J)=U(1,J); U(0,J)=U(N,J);
+    245.0     1  2        V(N+1,J)=V(1,J); V(0,J)=V(N,J);
+    246.0     1  2        P(N+1,J)=P(1,J); P(0,J)=P(N,J);
+    247.0     1  2     END INITCOND;
+    248.0            /*   DO I=1 TO N BY 2;
+    249.0                 DO J=2 TO M-1 BY 2;
+    250.0                    P(I,J)=0.25*(P(I+1,J)+P(I-1,J)+P(I,J+1)+P(I,J-1));
+    251.0                 END;
+    252.0              END;*/
+    253.0
+    254.0
+    255.0     1  1     PREDICTOR:
+    256.0              DO J=2 TO M-1;
+    257.0
+    258.0     1  2        DO I=NT TO N BY NTS;
+    259.0
+    260.0                /*    D1=-(U(I,J)-U(I,J-1))*EX(I,J)-
+    261.0                    (V(I,J)-V(I,J-1))*EY(I,J);
+    262.0
+    263.0                    D1=D1-(U(I+1,J)-U(I,J))*XIX(I,J)-
+    264.0                    (V(I+1,J)-V(I,J))*XIY(I,J);*/
+    265.0
+    266.0
+    267.0
+    268.0     1  3           D1(I,J)=-(U(I,J+1)-U(I,J-1))*EX(I,J)-
+    269.0                    (V(I,J+1)-V(I,J-1))*EY(I,J);
+    270.0
+    271.0
+    272.0     1  3           D1(I,J)=D1(I,J)-(U(I+1,J)-U(I-1,J))*XIX(I,J)-
+    273.0                    (V(I+1,J)-V(I-1,J))*XIY(I,J);
+    274.0
+    275.0
+    276.0             /*       D1=D1*CT*BETA;*/
+    277.0     1  3           D1(I,J)=D1(I,J)*CT*BETA/2;
+    278.0
+    279.0     1  3           P2(I,J)=P(I,J)+D1(I,J);
+    280.0
+    281.0     1  3           C1(I,J)=U(I,J)*XIX(I,J)+V(I,J)*XIY(I,J)-CLX(I,J);
+    282.0     1  3           C2(I,J)=U(I,J)*EX(I,J)+V(I,J)*EY(I,J)-CLE(I,J);
+    283.0
+    284.0     1  3           D2(I,J)=CLEE(I,J)*(U(I,J+1)-U(I,J)-U(I,J)+U(I,J-1))-
+    285.0                    C2(I,J)*(U(I,J)-U(I,J-1))-EX(I,J)*(P(I,J)-P(I,J-1));
+    286.0
+    287.0     1  3           D3(I,J)=CLEE(I,J)*(V(I,J+1)-V(I,J)-V(I,J)+V(I,J-1))-
+    288.0                    C2(I,J)*(V(I,J)-V(I,J-1))-EY(I,J)*(P(I,J)-P(I,J-1));
+    289.0
+    290.0     1  3           D2(I,J)=D2(I,J)+CLXX(I,J)*(U(I+1,J)-U(I,J)-U(I,J)+
+    291.0                    U(I-1,J))-
+    292.0                    C1(I,J)*(U(I+1,J)-U(I,J))-XIX(I,J)*(P(I+1,J)-P(I,J));
+    293.0
+    294.0     1  3           D3(I,J)=D3(I,J)+CLXX(I,J)*(V(I+1,J)-V(I,J)-V(I,J)+
+    295.0                    V(I-1,J))-
+    296.0                    C1(I,J)*(V(I+1,J)-V(I,J))-XIY(I,J)*(P(I+1,J)-P(I,J));
+    297.0
+    298.0     1  3           D2(I,J)=D2(I,J)*CT; D3=D3*CT;
+    299.0
+    300.0
+    301.0     1  3           U2(I,J)=U(I,J)+D2(I,J);
+    302.0     1  3           V2(I,J)=V(I,J)+D3(I,J);
+    303.0
+    304.0     1  3        END;
+    305.0     1  2    END PREDICTOR;
+    306.0
+    307.0     1  1    DO J=1 TO M;
+    308.0     1  2        U2(N+1,J)=U2(1,J); U2(0,J)=U2(N,J);
+    309.0     1  2        V2(N+1,J)=V2(1,J); V2(0,J)=V2(N,J);
+    310.0     1  2        P2(N+1,J)=P2(1,J); P2(0,J)=P2(N,J);
+    311.0     1  2    END;
+    312.0             /* Экстраполируем граничные условия по давлению */
+    313.0     1  1    DO I=1 TO N;/* BY 2;*/
+    314.0             /*  P2(I,1)=2*P2(I,2)-P2(I,3);         */
+    315.0     1  2       P2(I,1)=P2(I,2);
+    316.0             /*   P2(I+1,1)=0.5*(P2(I,2)+P2(I+2,2)); */
+    317.0             /*  P2(I,1)=(4*P2(I,2)-P2(I,3))/3;*/
+    318.0             /*  P2(I,1)=0.5*(P2(I-1,2)+P2(I+1,2)); */
+    319.0     1  2    END;
+    320.0     1  1    DO J=2 TO M-1 BY 2;
+    321.0     1  2        P2(N/2+1,J)=0.5*(P2(N/2+1,J-1)+P2(N/2-1,J));
+    322.0     1  2    END;
+    323.0
+    324.0             /* сглаживаем заднюю кромку */
+    325.0
+    326.0             /*P2(N/2+1,1)=0.5*(P2(N/2,1)+P2(N/2+2,1));*/
+    327.0     1  1    CORRECTOR:
+    328.0              DO I=NT TO N BY NTS;
+    329.0     1  2        DO J=2 TO M-1;
+    330.0
+    331.0            /*        D1=-(U2(I,J+1)-U2(I,J))*EX(I,J)-
+    332.0                    (V2(I,J+1)-V2(I,J))*EY(I,J);
+    333.0
+    334.0                    D1=D1-(U2(I,J)-U2(I-1,J))*XIX(I,J)-
+    335.0                    (V2(I,J)-V2(I-1,J))*XIY(I,J);
+    336.0
+    337.0                    D1=D1*CT*BETA;*/
+    338.0
+    339.0
+    340.0     1  3           D1(I,J)=-(U2(I,J+1)-U2(I,J-1))*EX(I,J)-
+    341.0                    (V2(I,J+1)-V2(I,J-1))*EY(I,J);
+    342.0
+    343.0     1  3           D1(I,J)=D1(I,J)-(U2(I+1,J)-U2(I-1,J))*XIX(I,J)-
+    344.0                    (V2(I+1,J)-V2(I-1,J))*XIY(I,J);
+    345.0
+    346.0     1  3           D1(I,J)=D1(I,J)*CT*BETA/2;
+    347.0
+    348.0
+    349.0     1  3           P1(I,J)=5E-1*(P(I,J)+P2(I,J)+D1(I,J));
+    350.0
+    351.0
+    352.0     1  3           C1(I,J)=U2(I,J)*XIX(I,J)+V2(I,J)*XIY(I,J)-CLX(I,J);
+    353.0     1  3           C2(I,J)=U2(I,J)*EX(I,J)+V2(I,J)*EY(I,J)-CLE(I,J);
+    354.0
+    355.0     1  3           D2(I,J)=CLEE(I,J)*(U2(I,J+1)-U2(I,J)-U2(I,J)+U2(I,J-1))-
+    356.0                    C2(I,J)*(U2(I,J+1)-U2(I,J))-EX(I,J)*(P2(I,J+1)-P2(I,J));
+    357.0
+    358.0     1  3           D3(I,J)=CLEE(I,J)*(V2(I,J+1)-V2(I,J)-V2(I,J)+V2(I,J-1))-
+    359.0                    C2(I,J)*(V2(I,J+1)-V2(I,J))-EY(I,J)*(P2(I,J+1)-P2(I,J));
+    360.0
+    361.0
+    362.0     1  3           D2(I,J)=D2(I,J)+CLXX(I,J)*(U2(I+1,J)-U2(I,J)-U2(I,J)+
+    363.0                    U2(I-1,J))-
+    364.0                    C1(I,J)*(U2(I,J)-U2(I-1,J))-XIX(I,J)*(P2(I,J)-P2(I-1,J));
+    365.0
+    366.0     1  3           D3(I,J)=D3(I,J)+CLXX(I,J)*(V2(I+1,J)-V2(I,J)-V2(I,J)+
+    367.0                    V2(I-1,J))-
+    368.0                    C1(I,J)*(V2(I,J)-V2(I-1,J))-XIY(I,J)*(P2(I,J)-P2(I-1,J));
+    369.0
+    370.0     1  3           D2(I,J)=D2(I,J)*CT; D3(I,J)=D3(I,J)*CT;
+    371.0
+    372.0
+    373.0     1  3           U1(I,J)=5E-1*(U(I,J)+U2(I,J)+D2(I,J));
+    374.0     1  3           V1(I,J)=5E-1*(V(I,J)+V2(I,J)+D3(I,J));
+    375.0
+    376.0     1  3           DPM=MAX(DPM,ABS(P1(I,J)-P(I,J)));
+    377.0     1  3           DUM=MAX(DUM,ABS(U1(I,J)-U(I,J)));
+    378.0     1  3           DVM=MAX(DVM,ABS(V1(I,J)-V(I,J)));
+    379.0
+    380.0
+    381.0
+    382.0                /*    IF P1>1 THEN P1=1;*/
+    383.0             /*       IF P1<-100 THEN P1=-100;
+    384.0
+    385.0            /*        IF ABS(U1)>20 THEN DO;
+    386.0                    V1=20*V1/U1;
+    387.0                    U1=20*SIGN(U1);END;
+    388.0
+    389.0                    IF ABS(V1)>20 THEN DO;
+    390.0                    U1=20*U1/V1;
+    391.0                    V1=20*SIGN(V1);END;*/
+    392.0
+    393.0     1  3           P(I,J)=P1(I,J);
+    394.0     1  3           U(I,J)=U1(I,J);
+    395.0     1  3           V(I,J)=V1(I,J);
+    396.0
+    397.0     1  3         END;
+    398.0
+    399.0            /* Корректируем внешнюю границу */
+    400.0
+    401.0              /*   IF I>=N/4 & I<=3*N/4 THEN DO;*/
+    402.0              /*       P(I,M),P2(I,M)=P(I,M-1);*/
+    403.0              /*       U(I,M),U2(I,M)=U(I,M-1);
+    404.0                     V(I,M),V2(I,M)=V(I,M-1);*/
+    405.0
+    406.0              /*       U(I,M),U2(I,M)=(5*U(I,M-1)-4*U(I,M-2)+U(I,J-3))/2;
+    407.0                     V(I,M),V2(I,M)=(5*V(I,M-1)-4*V(I,M-2)+V(I,J-3))/2;*/
+    408.0              /*       P(I,M),P2(I,M)=(5*P(I,M-1)-4*P(I,M-2)+P(I,J-3))/2;*/
+    409.0              /*    END;            */
+    410.0
+    411.0     1  2         END CORRECTOR;
+    412.0            /*       if dpm/ct/beta/ammax>10 then iw=0;*/
+    413.0
+    414.0            /*      P(N+1,2)=P(1,2);P(0,2)=P(N,2);*/
+    415.0
+    416.0            /* Экстраполируем граничные условия по давлению */
+    417.0     1  1         DO I=1 TO N BY 2;
+    418.0     1  2           P(I,1)=P(I,2);
+    419.0     1  2           P(I+1,1)=0.5*(P(I,2)+P(I+2,2));
+    420.0            /*        P(I,1)=(4*P(I,2)-P(I,3))/3;*/
+    421.0            /*        P(I,1)=2*P(I,2)-P(I,3);*/
+    422.0            /*      P(I,1)=0.5*(P(I-1,2)+P(I+1,2));*/
+    423.0     1  2         END;
+    424.0     1  1    DO J=2 TO M-1 BY 2;
+    425.0     1  2        P2(N/2+1,J)=0.5*(P2(N/2+1,J-1)+P2(N/2-1,J));
+    426.0     1  2    END;
+    427.0
+    428.0            /* Усредняем заднюю кромку */
+    429.0
+    430.0             /* P(N/2+1,1)=0.5*(P(N/2,1)+P(N/2+2,1));*/
+    431.0
+    432.0     1  1     IF (K<10 | MOD(K,1000)=0) THEN DO;
+    433.0     1  2     PUT STRING(DISP)EDIT(CHARVAL(27),'[',NT,';1H',
+    434.0              'K=',K,'   K2=',K2,'   K1=',K1,'DP=',
+    435.0              DPM/CT/BETA/AMMAX,
+    436.0              'DU=',DUM/CT,'DV=',DVM/CT,'DPMIN=',DPMIN/CT/BETA/AMMAX,'CT=',CT)
+    437.0              (2 A(1),F(1),A,3(A,F(6)),5(X(3),A,P'9V,9999K---'));
+    438.0     1  2     DISPLAY(DISP); END;
+    439.0
+    440.0     1  1     DPMIN=MIN(DPM,DPMIN);
+    441.0
+    442.0     1  1     IF DPMIN < DPM THEN K2=K2+1; ELSE K2=0;
+    443.0     1  1     DPMIN1=MAX(DPMIN,DPMIN);
+    444.0
+    445.0     1  1     END TIMELOOP;
+    446.0     1      IW=0;
+    447.0     1        PUT STRING (DISP) EDIT ('Поток ',NT,' завершен')(A,F(1),A);
+    448.0     1        DISPLAY (DISP);
+    449.0     1        END MAINCALC;
+    450.0             END NMSCMT;
+
+
+5724-B67  IBM(R) PL/I for Windows   (NOUNDERFLOW):                                             2019.06.10 15:10:56   Page     3
+
+
+                   Attribute/Xref Table
+
+
+    Line.File Identifier                      Attributes
+
+      25.0    AA                              AUTOMATIC FLOAT DEC(16)
+     +++++++  ABS                             BUILTIN
+     +++++++  ABS                             BUILTIN
+     +++++++  ADDR                            BUILTIN
+      27.0    AK                              AUTOMATIC FLOAT DEC(6)
+      26.0    ALPHA                           AUTOMATIC FLOAT DEC(16)
+      28.0    ALR                             AUTOMATIC FLOAT DEC(16)
+      15.0    AMMAX                           STATIC FLOAT DEC(16)
+      15.0    BETA                            STATIC FLOAT DEC(16)
+     100.0    BETALOOP                        CONSTANT LABEL
+     222.0    BN                              PARAMETER BYVALUE POINTER
+      11.0    C1                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      11.0    C2                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      26.0    CDR                             AUTOMATIC FLOAT DEC(16)
+     +++++++  CHARVAL                         BUILTIN
+     +++++++  CHARVAL                         BUILTIN
+       7.0    CLE                             STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+       7.0    CLEE                            STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+       7.0    CLX                             STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+       7.0    CLXX                            STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+      20.0    CONV                            CONSTANT EXTERNAL FILE RECORD
+                                              INPUT
+     327.0    CORRECTOR                       CONSTANT LABEL
+     +++++++  COSD                            BUILTIN
+      76.0    COURANT                         CONSTANT LABEL
+      25.0    CRELP                           AUTOMATIC FLOAT DEC(16)
+      15.0    CT                              STATIC FLOAT DEC(16)
+     236.0    CTHALF                          CONSTANT LABEL
+      27.0    CX                              AUTOMATIC FLOAT DEC(6)
+      27.0    CXA                             AUTOMATIC FLOAT DEC(6)
+      27.0    CY                              AUTOMATIC FLOAT DEC(6)
+      27.0    CYA                             AUTOMATIC FLOAT DEC(6)
+      27.0    CYAAL                           AUTOMATIC FLOAT DEC(6)
+      11.0    D1                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      11.0    D2                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      11.0    D3                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      15.0    DDP                             STATIC FLOAT DEC(16)
+      23.0    DISP                            AUTOMATIC CHARACTER(200) VARYING
+                                              UNALIGNED
+     223.0    DISP                            AUTOMATIC CHARACTER(132)
+                                              UNALIGNED
+      28.0    DN                              AUTOMATIC FLOAT DEC(16)
+      26.0    DP                              AUTOMATIC FLOAT DEC(16)
+      26.0    DPM                             AUTOMATIC FLOAT DEC(16)
+     225.0    DPM                             AUTOMATIC FLOAT DEC(16)
+      28.0    DPM2                            AUTOMATIC FLOAT DEC(16)
+     225.0    DPM2                            AUTOMATIC FLOAT DEC(16)
+      26.0    DPMIN                           AUTOMATIC FLOAT DEC(16)
+     225.0    DPMIN                           AUTOMATIC FLOAT DEC(16)
+       6.0    DPMIN1                          STATIC FLOAT DEC(6)
+       6.0    DPMIN2                          STATIC FLOAT DEC(6)
+      26.0    DUM                             AUTOMATIC FLOAT DEC(16)
+     225.0    DUM                             AUTOMATIC FLOAT DEC(16)
+      26.0    DVM                             AUTOMATIC FLOAT DEC(16)
+     225.0    DVM                             AUTOMATIC FLOAT DEC(16)
+       7.0    EX                              STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+       7.0    EY                              STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+     +++++++  FLOAT                           BUILTIN
+      20.0    GP                              CONSTANT EXTERNAL FILE INPUT
+      22.0    I                               AUTOMATIC FIXED BIN(31,0)
+     224.0    I                               AUTOMATIC FIXED BIN(31,0)
+     224.0    IL                              AUTOMATIC FIXED BIN(31,0)
+     242.0    INITCOND                        CONSTANT LABEL
+     *******  ITC                             AUTOMATIC FIXED BIN(15,0)
+     224.0    IU                              AUTOMATIC FIXED BIN(31,0)
+      16.0    IW                              STATIC FIXED BIN(15,0) INITIAL
+      22.0    J                               AUTOMATIC FIXED BIN(31,0)
+     224.0    J                               AUTOMATIC FIXED BIN(31,0)
+      22.0    K                               AUTOMATIC FIXED BIN(31,0)
+     224.0    K                               AUTOMATIC FIXED BIN(31,0)
+      14.0    K1                              STATIC FIXED BIN(31,0)
+      22.0    K2                              AUTOMATIC FIXED BIN(31,0)
+     224.0    K2                              AUTOMATIC FIXED BIN(31,0)
+      14.0    KMAX                            STATIC FIXED BIN(31,0)
+     116.0    LABEL1                          CONSTANT LABEL
+     +++++++  LOG                             BUILTIN
+      14.0    M                               STATIC FIXED BIN(31,0)
+      32.0    MAINCALC                        CONSTANT EXTERNAL
+                                              ENTRY( BYVALUE POINTER )
+     220.0    MAINCALC                        CONSTANT EXTERNAL
+                                              ENTRY( BYVALUE POINTER )
+     107.0    MAINLOOP                        CONSTANT LABEL
+     +++++++  MAX                             BUILTIN
+     +++++++  MAX                             BUILTIN
+     +++++++  MIN                             BUILTIN
+     +++++++  MIN                             BUILTIN
+     +++++++  MOD                             BUILTIN
+      14.0    N                               STATIC FIXED BIN(31,0)
+      17.0    NSMC                            CONSTANT EXTERNAL
+                                              ENTRY()
+      30.0    NT                              STATIC DIM(1:8) FIXED BIN(31,0)
+                                              INITIAL
+     222.0    NT                              BASED ( BN ) FIXED BIN(31,0)
+      14.0    NTS                             STATIC FIXED BIN(31,0)
+     198.0    OUTPUTPLOT                      CONSTANT LABEL
+     167.0    OUTRES                          CONSTANT LABEL
+       9.0    P                               STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      11.0    P1                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+       9.0    P2                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      20.0    PLOT                            CONSTANT EXTERNAL FILE OUTPUT
+      20.0    PLOT1                           CONSTANT EXTERNAL FILE OUTPUT
+      20.0    PLOT2                           CONSTANT EXTERNAL FILE OUTPUT
+     +++++++  PLOT3                           CONSTANT EXTERNAL FILE
+      25.0    PMAX                            AUTOMATIC FLOAT DEC(16)
+     225.0    PMAX                            AUTOMATIC FLOAT DEC(16)
+     255.0    PREDICTOR                       CONSTANT LABEL
+      25.0    RE                              AUTOMATIC FLOAT DEC(16)
+      61.0    READDATA                        CONSTANT LABEL
+     119.0    READGRID                        CONSTANT LABEL
+     +++++++  SIND                            BUILTIN
+     +++++++  SQRT                            BUILTIN
+      28.0    SSS                             AUTOMATIC FLOAT DEC(16)
+      21.0    SYSIN                           CONSTANT EXTERNAL FILE INPUT
+      21.0    SYSPRINT                        CONSTANT FILE OUTPUT
+     232.0    TIMELOOP                        CONSTANT LABEL
+      31.0    TR                              AUTOMATIC DIM(1:8) TASK
+       9.0    U                               STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      11.0    U1                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+       9.0    U2                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      28.0    UV1                             AUTOMATIC FLOAT DEC(16)
+      28.0    UV2                             AUTOMATIC FLOAT DEC(16)
+       9.0    V                               STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      11.0    V1                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+       9.0    V2                              STATIC DIM(-1:502,0:500) FLOAT
+                                              DEC(16)
+      28.0    VMAX                            AUTOMATIC FLOAT DEC(16)
+      24.0    X                               STATIC DIM(1:501,1:500) FLOAT
+                                              DEC(6)
+       7.0    XIX                             STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+       7.0    XIY                             STATIC DIM(0:501,1:500) FLOAT
+                                              DEC(6)
+      24.0    Y                               STATIC DIM(1:501,1:500) FLOAT
+                                              DEC(6)
+
+
+5724-B67  IBM(R) PL/I for Windows   (NOUNDERFLOW):                                             2019.06.10 15:10:56   Page     4
+
+
+                   Aggregate Length Table
+
+    Line.File Dims     Offset   Total Size    Base Size  Identifier
+
+
+       7.0     2            0      1004000            4 XIX
+
+       7.0     2            0      1004000            4 XIY
+
+       7.0     2            0      1004000            4 EX
+
+       7.0     2            0      1004000            4 EY
+
+       7.0     2            0      1004000            4 CLX
+
+       7.0     2            0      1004000            4 CLE
+
+       7.0     2            0      1004000            4 CLXX
+
+       7.0     2            0      1004000            4 CLEE
+
+       9.0     2            0      2020032            8 U
+
+       9.0     2            0      2020032            8 V
+
+       9.0     2            0      2020032            8 P
+
+       9.0     2            0      2020032            8 U2
+
+       9.0     2            0      2020032            8 V2
+
+       9.0     2            0      2020032            8 P2
+
+      11.0     2            0      2020032            8 U1
+
+      11.0     2            0      2020032            8 V1
+
+      11.0     2            0      2020032            8 P1
+
+      11.0     2            0      2020032            8 D1
+
+      11.0     2            0      2020032            8 D2
+
+      11.0     2            0      2020032            8 D3
+
+      11.0     2            0      2020032            8 C1
+
+      11.0     2            0      2020032            8 C2
+
+      24.0     2            0      1002000            4 X
+
+      24.0     2            0      1002000            4 Y
+
+      30.0     1            0           32            4 NT
+
+      31.0     1            0          128           16 TR
+
+5724-B67  IBM(R) PL/I for Windows   (NOUNDERFLOW):                                             2019.06.10 15:10:56   Page     5
+
+
+Compiler Messages
+
+Message       Line.File Message Description
+
+IBM1041I I      45.0    Comment spans 3 lines.
+IBM1063I I     100.0    Code generated for DO group would be more efficient
+                        if control variable were a 4-byte integer.
+IBM1041I I     135.0    Comment spans 4 lines.
+IBM1039I I     171.0    Variable ITC is implicitly declared.
+IBM1043I I     216.0    PLOT3 is contextually declared as FILE.
+IBM1041I I     237.0    Comment spans 3 lines.
+IBM1041I I     248.0    Comment spans 5 lines.
+IBM1041I I     260.0    Comment spans 5 lines.
+IBM1041I I     331.0    Comment spans 7 lines.
+IBM1041I I     383.0    Comment spans 9 lines.
+IBM1041I I     403.0    Comment spans 2 lines.
+IBM1041I I     406.0    Comment spans 2 lines.
+
+
+File Reference Table
+
+  File    Included From  Name
+
+     0                   E:\cloud\pli\WORKING\NSMCMT.pli
+
+
+Component    Return Code    Messages (Total/Suppressed)    Time
+
+MACRO            0                0  /  0                   0 secs
+Compiler         0               12  /  0                   0 secs
+
+End of compilation of NMSCMT

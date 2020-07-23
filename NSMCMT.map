@@ -1,0 +1,516 @@
+
+IBM(R) Linker for Windows(R), Version 03.06.PL1 Sep 15 1999 14:26:13
+Copyright (C) IBM Corporation 1988, 1998.
+Copyright (C) Microsoft Corp. 1988, 1989.
+All rights reserved.
+
+Current option settings:
+	EXEC	CODE:RX	DATA:RW
+	Alignfile:0x00000200	ALIGNAddr:0x00010000	BASE:0x00400000
+	MAXSIZE:0x10000000	NOBRowse	NODBgpack	NODEbug:none
+	DEFaultlibrarysearch	EXTdictionary	FIxed	NOFOrce
+	HEAP:0x00100000,0x00001000	Linenumbers	LOgo	MAP:NSMCMT.map
+	OCache:0x00000000	NOOPTFunc	PMTYPE:VIO	SEGMENTS:256 
+	STACK:0x00100000,0x00001000	STUB:lnkwds30.exe
+	SUBSYSTEM:CONSOLE,03.10	NOVERBose	VERSION:00.00
+
+
+Image based at 00400000
+
+ Start     Length     Name                   Class
+ --- Segment 1 begins ---
+ 00410000 00000001EH .text HEPWM20.dll                  CODE 32-bit
+	at offset 00000000 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000006 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 0000000C 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000012 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000018 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+
+ 0041001E 000000048H .text ibmwm20.dll                  CODE 32-bit
+	at offset 00000000 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000006 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000000C 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000012 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000018 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000001E 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000024 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000002A 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000030 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000036 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000003C 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000042 00006H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+
+ 00410068 000000038H CODE                   CODE 32-bit
+	at offset 00000000 00038H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (ibmpeep.asm)
+
+ 004100A0 0000048DAH CODE32                 CODE 32-bit
+	at offset 00000000 0448BH bytes from NSMCMT.OBJ (E:\cloud\pli\WORKING\NSMCMT.pli)
+	at offset 0000448C 0005DH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\ibmp2stw.mac)
+	at offset 000044F0 00022H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (g:\library\meminit.pli)
+	at offset 00004520 00110H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\p6mmove.asm)
+	at offset 00004630 00110H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\memmove.asm)
+	at offset 00004740 000B7H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\p6memcpy.asm)
+	at offset 00004800 000B7H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\memcpy.asm)
+	at offset 000048C0 0001AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\isppro.asm)
+
+ 0041497C 000000000H _TEXT                  CODE 32-bit
+
+ --- Segment 2 begins ---
+ 00420000 000000000H CONST                  CONST 32-bit
+
+ 00420000 0000006B4H CONST32_RO             CONST 32-bit
+	at offset 00000000 004F4H bytes from NSMCMT.OBJ (E:\cloud\pli\WORKING\NSMCMT.pli)
+	at offset 000004F4 00100H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (g:\library\ibmpysbs.pli)
+	at offset 00000600 00024H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\p6mmove.asm)
+	at offset 00000630 00024H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\memmove.asm)
+	at offset 00000660 00024H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\p6memcpy.asm)
+	at offset 00000690 00024H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\memcpy.asm)
+
+ --- Segment 3 begins ---
+ 00430000 000000014H .idata$2 HEPWM20.dll               .idata 32-bit
+	at offset 00000000 00014H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+
+ 00430014 000000014H .idata$2 ibmwm20.dll               .idata 32-bit
+	at offset 00000000 00014H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+
+ 00430028 000000014H .idata$3 ibmwm20.dll               .idata 32-bit
+	at offset 00000000 00014H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+
+ 0043003C 000000018H .idata$4 HEPWM20.dll               .idata 32-bit
+	at offset 00000000 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000004 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000008 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 0000000C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000010 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000014 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+
+ 00430054 000000034H .idata$4 ibmwm20.dll               .idata 32-bit
+	at offset 00000000 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000004 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000008 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000000C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000010 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000014 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000018 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000001C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000020 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000024 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000028 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000002C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000030 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+
+ 00430088 000000018H .idata$5 HEPWM20.dll               .idata 32-bit
+	at offset 00000000 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000004 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000008 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 0000000C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000010 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000014 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+
+ 004300A0 000000034H .idata$5 ibmwm20.dll               .idata 32-bit
+	at offset 00000000 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000004 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000008 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000000C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000010 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000014 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000018 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000001C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000020 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000024 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000028 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000002C 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000030 00004H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+
+ 004300D4 000000040H .idata$6 HEPWM20.dll               .idata 32-bit
+	at offset 00000000 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 0000000C 0000AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000016 0000AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000020 0000AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 0000002A 0000AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+	at offset 00000034 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\HEPWM20I.LIB
+
+ 00430114 000000098H .idata$6 ibmwm20.dll               .idata 32-bit
+	at offset 00000000 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000000C 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000018 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000024 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000030 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000003C 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000048 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000054 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000060 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000006C 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000078 0000CH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 00000084 0000AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+	at offset 0000008E 0000AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB
+
+ --- Segment 4 begins ---
+ 00440000 000000000H STACK                  STACK 32-bit
+
+ 00440000 00000001AH _DATA                  DATA 32-bit
+	at offset 00000000 0001AH bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (l:\source\ibmp2stw.mac)
+
+ --- Segment 5 begins ---
+ 00450000 0000003F4H DATA32                 DATA 32-bit
+	at offset 00000000 003ECH bytes from NSMCMT.OBJ (E:\cloud\pli\WORKING\NSMCMT.pli)
+	at offset 000003EC 00008H bytes from C:\Program Files (x86)\IBM\VAPLI\LIB\IBMWM20I.LIB (g:\library\meminit.pli)
+
+ --- Segment 6 begins ---
+ 00460000 00248A9F4H BSS32                  BSS 32-bit
+	at offset 00000000 248A9F4H bytes from NSMCMT.OBJ (E:\cloud\pli\WORKING\NSMCMT.pli)
+
+ 028EA9F4 000000000H _BSS                   BSS 32-bit
+
+
+ Origin   Group
+ 0000:0   FLAT
+ 0005:0   DGROUP
+
+
+ Address         Publics by Name
+ 004100A0       ?MAINCALC
+ 00430000       HEPWM20_IMPORT_DESCRIPTOR
+ 00430014       ibmwm20_IMPORT_DESCRIPTOR
+ 0041001E       _CEETDCSD
+ 00410024       _CEETDSND
+ 0041002A       _CEETDSQT
+ 00410030       _CEETSLOG
+ 00410006       _hepACEH
+ 0041000C       _hepCFEH
+ 00410018       _hepchdlr
+ 00410000       _HEPSJMP
+ 00410012       _hepTEH
+ 0043009C       HEPWM20_NULL_THUNK_DATA
+ 00410054       _IBMBEBOP
+ 00410036       _IBMBOFC1
+ 0041005A       _IBMINIT
+ 00410068       _IBMPEEP
+ 0041003C       _IBMPEJMP
+ 00410042       _IBMPJDSA
+ 00410048       _IBMPTAT1
+ 0041004E       _IBMPTWAI
+ 0041452C       _IBMSTRTW
+ 00410060       _IBMTERM
+ 004300D0       ibmwm20_NULL_THUNK_DATA
+ 00414960       _isppro
+ 00411782       _MAIN
+ 004148A0       _memcpy
+ 00414590       _MEMINIT
+ 004146D0       _memmove
+ 004147E0       _p6memcpy
+ 004145C0       _p6memmove
+ 00440000       __ACRTUSED
+ 00440002       __FLTUSED
+ 004300A0       __imp__CEETDCSD
+ 004300A4       __imp__CEETDSND
+ 004300A8       __imp__CEETDSQT
+ 004300AC       __imp__CEETSLOG
+ 0043008C       __imp__hepACEH
+ 00430090       __imp__hepCFEH
+ 00430098       __imp__hepchdlr
+ 00430088       __imp__HEPSJMP
+ 00430094       __imp__hepTEH
+ 004300C4       __imp__IBMBEBOP
+ 004300B0       __imp__IBMBOFC1
+ 004300C8       __imp__IBMINIT
+ 004300B4       __imp__IBMPEJMP
+ 004300B8       __imp__IBMPJDSA
+ 004300BC       __imp__IBMPTAT1
+ 004300C0       __imp__IBMPTWAI
+ 004300CC       __imp__IBMTERM
+ 00430028       __NULL_IMPORT_DESCRIPTOR
+ 004503EC       __pfmemcpy
+ 004503F0       __pfmemmove
+ 004204F4       __signedBitsShift
+
+
+ Address         Publics by Value
+ 00410000       _HEPSJMP
+ 00410006       _hepACEH
+ 0041000C       _hepCFEH
+ 00410012       _hepTEH
+ 00410018       _hepchdlr
+ 0041001E       _CEETDCSD
+ 00410024       _CEETDSND
+ 0041002A       _CEETDSQT
+ 00410030       _CEETSLOG
+ 00410036       _IBMBOFC1
+ 0041003C       _IBMPEJMP
+ 00410042       _IBMPJDSA
+ 00410048       _IBMPTAT1
+ 0041004E       _IBMPTWAI
+ 00410054       _IBMBEBOP
+ 0041005A       _IBMINIT
+ 00410060       _IBMTERM
+ 00410068       _IBMPEEP
+ 004100A0       ?MAINCALC
+ 00411782       _MAIN
+ 0041452C       _IBMSTRTW
+ 00414590       _MEMINIT
+ 004145C0       _p6memmove
+ 004146D0       _memmove
+ 004147E0       _p6memcpy
+ 004148A0       _memcpy
+ 00414960       _isppro
+ 004204F4       __signedBitsShift
+ 00430000       HEPWM20_IMPORT_DESCRIPTOR
+ 00430014       ibmwm20_IMPORT_DESCRIPTOR
+ 00430028       __NULL_IMPORT_DESCRIPTOR
+ 00430088       __imp__HEPSJMP
+ 0043008C       __imp__hepACEH
+ 00430090       __imp__hepCFEH
+ 00430094       __imp__hepTEH
+ 00430098       __imp__hepchdlr
+ 0043009C       HEPWM20_NULL_THUNK_DATA
+ 004300A0       __imp__CEETDCSD
+ 004300A4       __imp__CEETDSND
+ 004300A8       __imp__CEETDSQT
+ 004300AC       __imp__CEETSLOG
+ 004300B0       __imp__IBMBOFC1
+ 004300B4       __imp__IBMPEJMP
+ 004300B8       __imp__IBMPJDSA
+ 004300BC       __imp__IBMPTAT1
+ 004300C0       __imp__IBMPTWAI
+ 004300C4       __imp__IBMBEBOP
+ 004300C8       __imp__IBMINIT
+ 004300CC       __imp__IBMTERM
+ 004300D0       ibmwm20_NULL_THUNK_DATA
+ 00440000       __ACRTUSED
+ 00440002       __FLTUSED
+ 004503EC       __pfmemcpy
+ 004503F0       __pfmemmove
+
+
+Line numbers for NSMCMT.OBJ(E:\cloud\pli\WORKING\NSMCMT.pli)
+
+	Record Number of Start of Source: 0
+	Number of Primary Source Records: 0
+	Source & Listing Files: 1
+	File  1) E:\cloud\pli\WORKING\NSMCMT.pli
+
+
+Line numbers for NSMCMT.OBJ(E:\cloud\pli\WORKING\NSMCMT.pli) segment CODE32 (@0x00000000)
+
+	 Source    Src File    Seg:Offset
+	Line Num    Index          (0X)
+	--------   --------   -------------
+	   220          1     0001:000000a0
+	   227          1     0001:000000f2
+	   228          1     0001:00000220
+	   229          1     0001:00000237
+	   230          1     0001:00000241
+	   231          1     0001:00000249
+	   232          1     0001:00000251
+	   241          1     0001:00000278
+	   242          1     0001:0000028c
+	   244          1     0001:000002b0
+	   245          1     0001:000002fb
+	   246          1     0001:00000346
+	   247          1     0001:00000391
+	   255          1     0001:0000039d
+	   258          1     0001:000003c4
+	   268          1     0001:00000402
+	   272          1     0001:00000452
+	   277          1     0001:000004d6
+	   279          1     0001:000004f6
+	   281          1     0001:0000050d
+	   282          1     0001:00000551
+	   284          1     0001:00000569
+	   287          1     0001:000005ad
+	   290          1     0001:000005da
+	   294          1     0001:0000062b
+	   298          1     0001:0000065d
+	   301          1     0001:00000706
+	   302          1     0001:00000724
+	   304          1     0001:00000739
+	   305          1     0001:00000762
+	   307          1     0001:00000775
+	   308          1     0001:00000796
+	   309          1     0001:000007e1
+	   310          1     0001:0000082c
+	   311          1     0001:00000877
+	   313          1     0001:00000883
+	   315          1     0001:000008c0
+	   319          1     0001:000008d8
+	   320          1     0001:000008f5
+	   321          1     0001:0000091e
+	   322          1     0001:0000098a
+	   327          1     0001:00000994
+	   329          1     0001:000009d1
+	   340          1     0001:00000b16
+	   343          1     0001:00000b60
+	   346          1     0001:00000be0
+	   349          1     0001:00000bef
+	   352          1     0001:00000c3b
+	   353          1     0001:00000c87
+	   355          1     0001:00000ca3
+	   358          1     0001:00000cda
+	   362          1     0001:00000d17
+	   366          1     0001:00000d6e
+	   370          1     0001:00000d9a
+	   373          1     0001:00000db2
+	   374          1     0001:00000ddd
+	   376          1     0001:00000e0c
+	   377          1     0001:00000e39
+	   378          1     0001:00000e62
+	   393          1     0001:00000e8d
+	   394          1     0001:00000ea3
+	   395          1     0001:00000eb3
+	   397          1     0001:00000ebd
+	   411          1     0001:00000ecd
+	   417          1     0001:00000efc
+	   418          1     0001:00000f30
+	   419          1     0001:00000f3c
+	   423          1     0001:00000f4e
+	   424          1     0001:00000f6b
+	   425          1     0001:00000f92
+	   426          1     0001:00000ff6
+	   432          1     0001:0000100a
+	   433          1     0001:0000105a
+	   438          1     0001:00001595
+	   440          1     0001:000015ae
+	   442          1     0001:000015c8
+	   443          1     0001:000015f1
+	   445          1     0001:0000160e
+	   446          1     0001:00001631
+	   447          1     0001:0000163a
+	   448          1     0001:0000174e
+	   449          1     0001:00001767
+	    17          1     0001:00001782
+	    34          1     0001:00001810
+	    35          1     0001:0000189b
+	    36          1     0001:00001909
+	    37          1     0001:0000193e
+	    38          1     0001:000019c3
+	    40          1     0001:000019d3
+	    41          1     0001:000019e3
+	    43          1     0001:00001a62
+	    44          1     0001:00001aec
+	    49          1     0001:00001b5e
+	    50          1     0001:00001c10
+	    51          1     0001:00001cc1
+	    52          1     0001:00001d63
+	    54          1     0001:00001e45
+	    55          1     0001:00001e80
+	    56          1     0001:00001ec5
+	    57          1     0001:00001f1a
+	    58          1     0001:00001f4c
+	    59          1     0001:00001f61
+	    61          1     0001:00001f8b
+	    63          1     0001:00001fa8
+	    64          1     0001:00001fd0
+	    65          1     0001:0000206a
+	    66          1     0001:000020eb
+	    67          1     0001:00002168
+	    68          1     0001:000021eb
+	    69          1     0001:00002268
+	    70          1     0001:000022eb
+	    71          1     0001:00002368
+	    72          1     0001:000023e4
+	    73          1     0001:000023fd
+	    74          1     0001:00002416
+	    75          1     0001:0000244c
+	    76          1     0001:00002458
+	    78          1     0001:00002492
+	    80          1     0001:00002526
+	    81          1     0001:0000254b
+	    82          1     0001:0000255d
+	    87          1     0001:0000257b
+	    88          1     0001:0000272b
+	    89          1     0001:000027bb
+	    93          1     0001:000027ca
+	    95          1     0001:000027d9
+	    99          1     0001:000027e3
+	   100          1     0001:000027ed
+	   102          1     0001:000027f3
+	   103          1     0001:000027fd
+	   104          1     0001:00002806
+	   106          1     0001:000029d7
+	   107          1     0001:000029f0
+	   109          1     0001:00002a10
+	   110          1     0001:00002a3d
+	   111          1     0001:00002a52
+	   112          1     0001:00002a71
+	   113          1     0001:00002a8a
+	   115          1     0001:00002a9f
+	   116          1     0001:00002abf
+	   117          1     0001:00002ac3
+	   118          1     0001:00002ae2
+	   119          1     0001:00002b62
+	   121          1     0001:00002b80
+	   122          1     0001:00002ba0
+	   124          1     0001:00002cb4
+	   125          1     0001:00002ccd
+	   126          1     0001:00002d32
+	   127          1     0001:00002d4b
+	   128          1     0001:00002d81
+	   129          1     0001:00002d99
+	   131          1     0001:00002db1
+	   132          1     0001:00002dc5
+	   134          1     0001:00002dd9
+	   139          1     0001:00002e23
+	   141          1     0001:00002e4b
+	   143          1     0001:00002e65
+	   144          1     0001:00002e8c
+	   146          1     0001:00002ea8
+	   147          1     0001:00002ee8
+	   148          1     0001:00002f1f
+	   149          1     0001:00002f31
+	   150          1     0001:00002f57
+	   151          1     0001:00002f69
+	   152          1     0001:00002f71
+	   153          1     0001:00002fb0
+	   154          1     0001:00002ff0
+	   155          1     0001:0000301f
+	   156          1     0001:0000302a
+	   157          1     0001:00003053
+	   159          1     0001:0000306b
+	   160          1     0001:000030f3
+	   162          1     0001:0000315f
+	   163          1     0001:00003173
+	   164          1     0001:00003245
+	   168          1     0001:0000330f
+	   169          1     0001:0000334e
+	   170          1     0001:00003374
+	   171          1     0001:000033eb
+	   172          1     0001:00003462
+	   175          1     0001:00003695
+	   177          1     0001:00003a58
+	   178          1     0001:00003aa0
+	   179          1     0001:00003bbc
+	   181          1     0001:00003c04
+	   182          1     0001:00003c30
+	   183          1     0001:00003c44
+	   185          1     0001:00003d58
+	   186          1     0001:00003d71
+	   187          1     0001:00003d94
+	   188          1     0001:00003e79
+	   190          1     0001:00003e92
+	   192          1     0001:00003ef1
+	   193          1     0001:00003f18
+	   195          1     0001:00004011
+	   196          1     0001:0000402a
+	   197          1     0001:00004084
+	   198          1     0001:000040a1
+	   200          1     0001:000040c0
+	   201          1     0001:000040e3
+	   203          1     0001:000040f9
+	   205          1     0001:000041e5
+	   207          1     0001:000042fa
+	   208          1     0001:00004340
+	   209          1     0001:00004359
+	   211          1     0001:00004372
+	   213          1     0001:00004395
+	   214          1     0001:000043c6
+	   215          1     0001:000043e9
+	   216          1     0001:0000440b
+	   217          1     0001:0000442f
+	   218          1     0001:00004443
+	    93          1     0001:00004460
+	    89          1     0001:000044b6
+	    90          1     0001:000044e7
+	    91          1     0001:00004503
+	    92          1     0001:00004517
+ 
+Program entry point at 0041452C

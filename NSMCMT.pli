@@ -1,0 +1,450 @@
+*process macro;
+ (NOUNDERFLOW):
+ NMSCMT:PACKAGE;
+ %DECLARE PRCZ CHARACTER;
+ %PRCZ='16';
+ DECLARE (DPMIN1,DPMIN2) FLOAT STATIC;
+ DECLARE (XIX, XIY, EX, EY, CLX, CLE, CLXX, CLEE)(0:501,500) FLOAT
+ /*CONTROLLED*/STATIC;
+ DECLARE (U, V, P, U2, V2, P2)(-1:502,0:500) FLOAT(PRCZ)
+ STATIC/*CONTROLLED*/;
+ DECLARE (U1, V1, P1, D1, D2, D3, C1, C2)(-1:502,0:500) FLOAT(PRCZ)
+ STATIC/*CONTROLLED*/;
+
+ DECLARE (N, M, KMAX, K1, NTS) BINARY FIXED(31) STATIC;
+ DECLARE (AMMAX,BETA,CT,DDP)FLOAT(PRCZ)/*STATIC*/;
+ DECLARE IW BINARY FIXED STATIC INIT(1);
+ NSMC:PROCEDURE OPTIONS (MAIN) REORDER;
+
+
+ DECLARE CONV FILE RECORD INPUT, GP FILE INPUT, (PLOT,PLOT1,PLOT2)
+ FILE OUTPUT, SYSPRINT FILE OUTPUT INTERNAL, SYSIN INPUT/*PRINT*/;
+ DECLARE (I, J, K, K2) BINARY FIXED(31)/* STATIC*/;
+ DECLARE DISP CHARACTER(200) VARYING;
+ DECLARE (X(501,500),Y(501,500)) FLOAT /*CONTROLLED*/static;
+ DECLARE (AA,RE,CRELP,PMAX,
+ DPM,DPMIN,DVM,DUM,DP,ALPHA,CDR)FLOAT(PRCZ)/*STATIC*/;
+ DECLARE (CY,CX,CYA,CXA,CYAAL,AK) FLOAT;
+ DECLARE (DPM2,DN,UV1,UV2,SSS,ALR,VMAX)FLOAT(PRCZ)/*STATIC*/;
+
+ DECLARE NT(8) FIXED BINARY (31) STATIC INITIAL(1,2,3,4,5,6,7,8);
+ DECLARE TR(8) TASK;
+ DECLARE MAINCALC ENTRY(POINTER BYVALUE);
+
+   OPEN FILE (PLOT1)TITLE('/NSMC1.PLOT, APPEND(N)')OUTPUT;
+   OPEN FILE (PLOT3)TITLE('/NSMC3.PLOT, APPEND(N)')OUTPUT;
+   CLOSE FILE (PLOT1), FILE (PLOT3);
+ GET DATA (ALPHA,RE,AA,CT,KMAX,NTS) /*COPY*/;
+ BETA=AA;
+
+ CRELP=1;
+ OPEN FILE (CONV)
+ TITLE('/CONV.OUT, TYPE(FIXED), RECSIZE(4)');
+ READ FILE(CONV) INTO(N);
+ READ FILE(CONV) INTO(M);
+ /*ALLOCATE U, V, P, U2, V2, P2;
+ ALLOCATE XIX, XIY, EX, EY, CLX, CLE, CLXX, CLEE;
+ ALLOCATE X,Y;*/
+
+ U,U2=COSD(ALPHA);
+ V,V2=SIND(ALPHA);
+ U(*,1),V(*,1),P(*,1), U2(*,1),V2(*,1),P2(*,1)=0;
+ P,P1,P2=0;
+
+ DO I=1 TO N;
+   DO J=2 TO M-1;
+      U(I,J)=U(I,M)*FLOAT(J-1)/FLOAT(M-1);
+      V(I,J)=V(I,M)*FLOAT(J-1)/FLOAT(M-1);
+   END;
+ END;
+ /* Читаем метрики преобразования сетки */
+ READDATA:
+ DO J=1 TO M;
+   DO I=1 TO N;
+      READ FILE(CONV)INTO(XIX(I,J));
+      READ FILE(CONV)INTO(XIY(I,J));
+      READ FILE(CONV)INTO(EX(I,J));
+      READ FILE(CONV)INTO(EY(I,J));
+      READ FILE(CONV)INTO(CLX(I,J));
+      READ FILE(CONV)INTO(CLE(I,J));
+      READ FILE(CONV)INTO(CLXX(I,J));
+      READ FILE(CONV)INTO(CLEE(I,J));
+   END;
+ END READDATA;
+ CLOSE FILE (CONV);
+  AMMAX=0;
+  COURANT:
+  DO I=1 TO N;
+   AMMAX=MAX(AMMAX,ABS(XIX(I,2)),ABS(XIY(I,2)),
+   ABS(EX(I,2)),ABS(EY(I,2)));
+  END COURANT;
+  CT=CT/AMMAX;
+  DDP=CT*4*BETA/1128;
+
+ /* Умножаем метрики на коэффициенты числа Рейнольдса */
+ /* и центральных разностей                           */
+
+ CLX=CLX/RE; CLE=CLE/RE; CLXX=CLXX/RE;
+ CLEE=CLEE/RE;
+ ON ERROR BEGIN;
+            DISPLAY ('ОШИБКА!');
+            GOTO LABEL1;
+          END;
+ ON ATTENTION GOTO LABEL1;
+
+  K1=0;
+ /* Здесь был главный цикл */
+ /*DO K=1 TO KMAX;*/
+ /*IF MOD (K,10)=0 THEN DISPLAY(CHARVAL(27)||'[5;1H'||K);*/
+ DPMIN2=100;
+ BETALOOP:
+  DO ITC=1 TO 10000;
+  DPMIN1=0;
+  IW=1;
+   PUT STRING(DISP)EDIT(CHARVAL(27),'[',15,';1H',
+   'ITC=',ITC) (2 A(1),F(2),2 A,F(4));
+ DISPLAY(DISP);
+ MAINLOOP:
+   DO I=1 TO NTS;
+      ATTACH MAINCALC(ADDR(NT(I))) THREAD (TR(I));
+  END MAINLOOP;
+  DO I=1 TO NTS;
+      WAIT THREAD (TR(I));
+  END;  
+ /*END;*/
+   DISPLAY('Расчет завершен');
+   LABEL1:REVERT ERROR;
+   DISPLAY('Выводим данные');
+   OPEN FILE (GP)TITLE('/GRID5.PLOT,')INPUT;
+ READGRID:
+   DO J=1 TO M;
+      DO I=1 TO N;
+         GET FILE(GP) LIST(X(I,J),Y(I,J)) SKIP;
+
+      END;
+      GET FILE (GP) SKIP(2);
+   END READGRID;
+   CLOSE FILE (GP);
+   X(N+1,1)=X(1,1);
+   Y(N+1,1)=Y(1,1);
+
+   CX=0;CY=0;
+   DN=ABS(X(1,1)-X(1,2));
+   
+   DO I=1 TO N;
+  /* UV1=SQRT(U(I,2)**2+V(I,2)**2);
+   UV2=SQRT(U(I+1,2)**2+V(I+1,2)**2);
+   SSS=SIGN((U(I+1,2)-U(I,1))*(X(I+1,2)-X(I,1))+
+    (V(I+1,2)-V(I,2))*(Y(I+1,1)-Y(I,1)));*/
+      CX=CX+(P(I,1)+P(I+1,1))*(Y(I+1,1)-Y(I,1))
+    /* +SSS*(UV2+UV1)*(X(I+1,1)-X(I,1))/RE/DN*/;
+     CY=CY-(P(I,1)+P(I+1,1))*(X(I+1,1)-X(I,1))
+     /*+SSS*(UV2+UV1)*(Y(I+1,1)-Y(I,1))/RE/DN*/;
+   END;
+   CX+=CX;CY+=CY;
+
+   CYA=CY*COSD(ALPHA)-CX*SIND(ALPHA);
+   CXA=CY*SIND(ALPHA)+CX*COSD(ALPHA);
+   ALR=ALPHA*3.14159265/180;
+   IF ALR ^=0 THEN CYAAL=CYA/ALR;
+   AK=CYA/CXA;
+   VMAX=0;
+   DO I=1 TO N;
+      DO J=1 TO M;
+         VMAX=MAX(VMAX,V(I,J)**2+U(I,J)**2);
+      END;
+   END;
+   VMAX=SQRT(VMAX);
+ 
+   OPEN FILE (PLOT1)TITLE('/NSMC1.PLOT, APPEND(Y)')OUTPUT;
+   OPEN FILE (PLOT3)TITLE('/NSMC3.PLOT, APPEND(Y)')OUTPUT;
+
+   CDR=0.002;
+   PUT SKIP FILE(PLOT1)LIST(ITC,CYAAL);
+   PUT SKIP FILE(PLOT3)LIST(ITC,LOG(DPMIN1));
+
+ /*IF(DPMIN1<DPMIN2) THEN */
+ OUTRES:DO;
+ OPEN FILE (SYSPRINT)/* PAGESIZE(2000)*/;
+ OPEN FILE(PLOT);
+ OPEN FILE (PLOT2)TITLE('/NSMC2.PLOT, APPEND(N)')OUTPUT;
+ PUT SKIP DATA (ITC);
+ PUT SKIP EDIT('Угол атаки',ALPHA,'Число Рейнольдса',RE,
+ 'Точек вдоль профиля',N,'Точек поперек профиля',M)
+ (2(A(25),F(12,2),SKIP),2(A(25),F(12,0),SKIP));
+   PUT SKIP(2) EDIT('Cy',CY,'Cx',CX,'Cya',CYA,'Cxa',
+   CXA,'Cya/Alpha',CYAAL,'K',AK,'Mmax=',VMAX/SQRT(BETA))
+   (A(10),F(7,3),SKIP);PUT SKIP;
+   PUT SKIP(2) EDIT ('I','Pн','Pв')
+   (X(3),A(4),2 A(7));PUT SKIP;
+
+     DO I=1 TO N/2+1;
+         J=N-I+2;
+         PUT SKIP EDIT (I,P(J,1), P(I,1))
+         (F(4),4(F(7,3)));
+     END;
+   DO I=1 TO N;
+      PUT FILE(PLOT)SKIP EDIT(X(I,1),2*P(I,1))(F(10,4),X(2));
+   END;
+
+   PUT FILE(PLOT) SKIP(2);
+
+   DO I=1 TO N/2+1;
+      PUT FILE(PLOT) SKIP EDIT(X(I,1),2*(-P(I,1)+P(N-I+2,1)))(F(10,4),
+ X(2));
+   END;
+   PUT FILE (PLOT) SKIP(2);
+   CLOSE FILE(PLOT);
+ OUTPUTPLOT:
+   DO J=1 TO M;
+      DO I=1 TO N;
+      I=MAX(I,1);
+  /*       PUT SKIP FILE(PLOT1)(X(I,J),Y(I,J));*/
+         PUT SKIP FILE(PLOT2)(X(I,J),Y(I,J));
+  /*       PUT SKIP FILE(PLOT1)(X(I,J)+P(I,J)*CDR*4,Y(I,J));*/
+        PUT SKIP FILE(PLOT2)(X(I,J)+U(I,J)*CDR,Y(I,J)+V(I,J)*CDR);
+  /*       PUT FILE(PLOT1)SKIP;*/
+         PUT FILE(PLOT2)SKIP;
+      END;
+   END OUTPUTPLOT;
+ END OUTRES;
+ DPMIN2=MIN(DPMIN2,DPMIN1);
+
+ CLOSE FILE (SYSPRINT);
+ CLOSE FILE (PLOT1);
+ CLOSE FILE (PLOT2);
+ CLOSE FILE (PLOT3);
+ END BETALOOP;
+ END NSMC;
+
+ MAINCALC:
+ PROCEDURE (BN) REORDER;
+ DECLARE BN POINTER BYVALUE, NT FIXED BINARY(31) BASED (BN);
+ DECLARE DISP CHARACTER(132);
+ DECLARE (I,J,K,K2,IL,IU) BINARY(31) FIXED;
+ DECLARE (DUM,DVM,DPM,PMAX,DPM2,DPMIN)
+ FLOAT(PRCZ);
+ PUT STRING (DISP) EDIT ('Поток ',NT,' запущен')(A,F(1),A);
+ DISPLAY (DISP);
+ DPMIN,DPM2=10000;
+ K2=0;
+ DPM=0;
+ TIMELOOP:
+ DO K=1 TO KMAX*NT UNTIL(IW=0/*DPM<DDP / | K1>0*/);
+
+ IF /*DPM>100*DPMIN |*/ K2>15000 THEN 
+ CTHALF:DO;
+ /*  K2=0;
+   CT=CT/2;DDP=DDP/2;
+   K1=K1+1;           */
+ END CTHALF;
+   DPM,DUM,DVM,PMAX=0;
+ INITCOND:
+   DO J=1 TO M;
+      U(N+1,J)=U(1,J); U(0,J)=U(N,J);
+      V(N+1,J)=V(1,J); V(0,J)=V(N,J);
+      P(N+1,J)=P(1,J); P(0,J)=P(N,J);
+   END INITCOND;
+ /*   DO I=1 TO N BY 2;
+      DO J=2 TO M-1 BY 2;
+         P(I,J)=0.25*(P(I+1,J)+P(I-1,J)+P(I,J+1)+P(I,J-1));
+      END;
+   END;*/
+
+
+   PREDICTOR:
+   DO J=2 TO M-1;
+
+      DO I=NT TO N BY NTS;
+
+     /*    D1=-(U(I,J)-U(I,J-1))*EX(I,J)-
+         (V(I,J)-V(I,J-1))*EY(I,J);
+
+         D1=D1-(U(I+1,J)-U(I,J))*XIX(I,J)-
+         (V(I+1,J)-V(I,J))*XIY(I,J);*/
+
+
+         
+         D1(I,J)=-(U(I,J+1)-U(I,J-1))*EX(I,J)-
+         (V(I,J+1)-V(I,J-1))*EY(I,J);
+
+         
+         D1(I,J)=D1(I,J)-(U(I+1,J)-U(I-1,J))*XIX(I,J)-
+         (V(I+1,J)-V(I-1,J))*XIY(I,J);
+
+
+  /*       D1=D1*CT*BETA;*/
+         D1(I,J)=D1(I,J)*CT*BETA/2;
+
+         P2(I,J)=P(I,J)+D1(I,J);
+
+         C1(I,J)=U(I,J)*XIX(I,J)+V(I,J)*XIY(I,J)-CLX(I,J);
+         C2(I,J)=U(I,J)*EX(I,J)+V(I,J)*EY(I,J)-CLE(I,J);
+
+         D2(I,J)=CLEE(I,J)*(U(I,J+1)-U(I,J)-U(I,J)+U(I,J-1))-
+         C2(I,J)*(U(I,J)-U(I,J-1))-EX(I,J)*(P(I,J)-P(I,J-1));
+
+         D3(I,J)=CLEE(I,J)*(V(I,J+1)-V(I,J)-V(I,J)+V(I,J-1))-
+         C2(I,J)*(V(I,J)-V(I,J-1))-EY(I,J)*(P(I,J)-P(I,J-1));
+
+         D2(I,J)=D2(I,J)+CLXX(I,J)*(U(I+1,J)-U(I,J)-U(I,J)+
+         U(I-1,J))-
+         C1(I,J)*(U(I+1,J)-U(I,J))-XIX(I,J)*(P(I+1,J)-P(I,J));
+
+         D3(I,J)=D3(I,J)+CLXX(I,J)*(V(I+1,J)-V(I,J)-V(I,J)+
+         V(I-1,J))-
+         C1(I,J)*(V(I+1,J)-V(I,J))-XIY(I,J)*(P(I+1,J)-P(I,J));
+
+         D2(I,J)=D2(I,J)*CT; D3=D3*CT;
+
+
+         U2(I,J)=U(I,J)+D2(I,J);
+         V2(I,J)=V(I,J)+D3(I,J);
+
+      END;
+  END PREDICTOR;
+
+  DO J=1 TO M;
+      U2(N+1,J)=U2(1,J); U2(0,J)=U2(N,J);
+      V2(N+1,J)=V2(1,J); V2(0,J)=V2(N,J);
+      P2(N+1,J)=P2(1,J); P2(0,J)=P2(N,J);
+  END;
+  /* Экстраполируем граничные условия по давлению */
+  DO I=1 TO N;/* BY 2;*/
+  /*  P2(I,1)=2*P2(I,2)-P2(I,3);         */
+     P2(I,1)=P2(I,2);
+  /*   P2(I+1,1)=0.5*(P2(I,2)+P2(I+2,2)); */                 
+  /*  P2(I,1)=(4*P2(I,2)-P2(I,3))/3;*/
+  /*  P2(I,1)=0.5*(P2(I-1,2)+P2(I+1,2)); */
+  END;
+  DO J=2 TO M-1 BY 2;
+      P2(N/2+1,J)=0.5*(P2(N/2+1,J-1)+P2(N/2-1,J));
+  END;
+
+  /* сглаживаем заднюю кромку */
+
+  /*P2(N/2+1,1)=0.5*(P2(N/2,1)+P2(N/2+2,1));*/
+  CORRECTOR:
+   DO I=NT TO N BY NTS;
+      DO J=2 TO M-1;
+
+ /*        D1=-(U2(I,J+1)-U2(I,J))*EX(I,J)-
+         (V2(I,J+1)-V2(I,J))*EY(I,J);
+
+         D1=D1-(U2(I,J)-U2(I-1,J))*XIX(I,J)-
+         (V2(I,J)-V2(I-1,J))*XIY(I,J);
+
+         D1=D1*CT*BETA;*/
+
+
+         D1(I,J)=-(U2(I,J+1)-U2(I,J-1))*EX(I,J)-
+         (V2(I,J+1)-V2(I,J-1))*EY(I,J);
+
+         D1(I,J)=D1(I,J)-(U2(I+1,J)-U2(I-1,J))*XIX(I,J)-
+         (V2(I+1,J)-V2(I-1,J))*XIY(I,J);
+
+         D1(I,J)=D1(I,J)*CT*BETA/2;
+
+
+         P1(I,J)=5E-1*(P(I,J)+P2(I,J)+D1(I,J));
+
+
+         C1(I,J)=U2(I,J)*XIX(I,J)+V2(I,J)*XIY(I,J)-CLX(I,J);
+         C2(I,J)=U2(I,J)*EX(I,J)+V2(I,J)*EY(I,J)-CLE(I,J);
+
+         D2(I,J)=CLEE(I,J)*(U2(I,J+1)-U2(I,J)-U2(I,J)+U2(I,J-1))-
+         C2(I,J)*(U2(I,J+1)-U2(I,J))-EX(I,J)*(P2(I,J+1)-P2(I,J));
+
+         D3(I,J)=CLEE(I,J)*(V2(I,J+1)-V2(I,J)-V2(I,J)+V2(I,J-1))-
+         C2(I,J)*(V2(I,J+1)-V2(I,J))-EY(I,J)*(P2(I,J+1)-P2(I,J));
+
+
+         D2(I,J)=D2(I,J)+CLXX(I,J)*(U2(I+1,J)-U2(I,J)-U2(I,J)+
+         U2(I-1,J))-
+         C1(I,J)*(U2(I,J)-U2(I-1,J))-XIX(I,J)*(P2(I,J)-P2(I-1,J));
+
+         D3(I,J)=D3(I,J)+CLXX(I,J)*(V2(I+1,J)-V2(I,J)-V2(I,J)+
+         V2(I-1,J))-
+         C1(I,J)*(V2(I,J)-V2(I-1,J))-XIY(I,J)*(P2(I,J)-P2(I-1,J));
+
+         D2(I,J)=D2(I,J)*CT; D3(I,J)=D3(I,J)*CT;
+
+
+         U1(I,J)=5E-1*(U(I,J)+U2(I,J)+D2(I,J));
+         V1(I,J)=5E-1*(V(I,J)+V2(I,J)+D3(I,J));
+
+         DPM=MAX(DPM,ABS(P1(I,J)-P(I,J)));
+         DUM=MAX(DUM,ABS(U1(I,J)-U(I,J)));
+         DVM=MAX(DVM,ABS(V1(I,J)-V(I,J)));
+
+
+
+     /*    IF P1>1 THEN P1=1;*/
+  /*       IF P1<-100 THEN P1=-100;
+
+ /*        IF ABS(U1)>20 THEN DO;
+         V1=20*V1/U1;
+         U1=20*SIGN(U1);END;
+
+         IF ABS(V1)>20 THEN DO;
+         U1=20*U1/V1;
+         V1=20*SIGN(V1);END;*/
+
+         P(I,J)=P1(I,J);
+         U(I,J)=U1(I,J);
+         V(I,J)=V1(I,J);
+
+       END;
+
+ /* Корректируем внешнюю границу */
+  
+   /*   IF I>=N/4 & I<=3*N/4 THEN DO;*/
+   /*       P(I,M),P2(I,M)=P(I,M-1);*/
+   /*       U(I,M),U2(I,M)=U(I,M-1);
+          V(I,M),V2(I,M)=V(I,M-1);*/
+
+   /*       U(I,M),U2(I,M)=(5*U(I,M-1)-4*U(I,M-2)+U(I,J-3))/2;
+          V(I,M),V2(I,M)=(5*V(I,M-1)-4*V(I,M-2)+V(I,J-3))/2;*/
+   /*       P(I,M),P2(I,M)=(5*P(I,M-1)-4*P(I,M-2)+P(I,J-3))/2;*/
+   /*    END;            */
+
+       END CORRECTOR;
+ /*       if dpm/ct/beta/ammax>10 then iw=0;*/
+
+ /*      P(N+1,2)=P(1,2);P(0,2)=P(N,2);*/
+
+ /* Экстраполируем граничные условия по давлению */
+       DO I=1 TO N BY 2;
+         P(I,1)=P(I,2);
+         P(I+1,1)=0.5*(P(I,2)+P(I+2,2));                  
+ /*        P(I,1)=(4*P(I,2)-P(I,3))/3;*/
+ /*        P(I,1)=2*P(I,2)-P(I,3);*/
+ /*      P(I,1)=0.5*(P(I-1,2)+P(I+1,2));*/
+       END;
+  DO J=2 TO M-1 BY 2;
+      P2(N/2+1,J)=0.5*(P2(N/2+1,J-1)+P2(N/2-1,J));
+  END;
+ 
+ /* Усредняем заднюю кромку */
+
+  /* P(N/2+1,1)=0.5*(P(N/2,1)+P(N/2+2,1));*/
+
+   IF (K<10 | MOD(K,1000)=0) THEN DO;
+   PUT STRING(DISP)EDIT(CHARVAL(27),'[',NT,';1H',
+   'K=',K,'   K2=',K2,'   K1=',K1,'DP=',
+   DPM/CT/BETA/AMMAX,
+   'DU=',DUM/CT,'DV=',DVM/CT,'DPMIN=',DPMIN/CT/BETA/AMMAX,'CT=',CT)
+   (2 A(1),F(1),A,3(A,F(6)),5(X(3),A,P'9V,9999K---'));
+   DISPLAY(DISP); END;
+
+   DPMIN=MIN(DPM,DPMIN);
+
+   IF DPMIN < DPM THEN K2=K2+1; ELSE K2=0;
+   DPMIN1=MAX(DPMIN,DPMIN);
+
+   END TIMELOOP;
+ IW=0;
+   PUT STRING (DISP) EDIT ('Поток ',NT,' завершен')(A,F(1),A);
+   DISPLAY (DISP);
+   END MAINCALC;
+  END NMSCMT;
